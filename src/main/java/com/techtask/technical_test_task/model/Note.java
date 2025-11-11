@@ -29,5 +29,5 @@ public class Note {
     @NotBlank(message = "Text cannot be empty")
     private String text;
 
-    private List<String> tags;
+    private List<Tag> tags;
 }

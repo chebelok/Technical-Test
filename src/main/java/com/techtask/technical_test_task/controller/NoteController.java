@@ -2,6 +2,7 @@ package com.techtask.technical_test_task.controller;
 
 import com.techtask.technical_test_task.dto.NoteDTO;
 import com.techtask.technical_test_task.model.Note;
+import com.techtask.technical_test_task.model.Tag;
 import com.techtask.technical_test_task.service.NoteService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -22,7 +23,7 @@ public class NoteController {
     }
 
     @PostMapping
-     public ResponseEntity <Object> creataNote(@Valid @RequestBody Note note, BindingResult result){
+     public ResponseEntity <Object> createNote(@Valid @RequestBody Note note, BindingResult result){
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body(result.getAllErrors());
         }
@@ -41,10 +42,10 @@ public class NoteController {
 
     @GetMapping
     public Page<NoteDTO> getNotes(
-            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) List<Tag> tags,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return noteService.getNotes(tag, page, size);
+        return noteService.getNotes(tags, page, size);
     }
 
     @GetMapping("/{id}/stats")

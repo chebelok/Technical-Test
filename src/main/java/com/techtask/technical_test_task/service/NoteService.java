@@ -2,6 +2,7 @@ package com.techtask.technical_test_task.service;
 
 import com.techtask.technical_test_task.dto.NoteDTO;
 import com.techtask.technical_test_task.model.Note;
+import com.techtask.technical_test_task.model.Tag;
 import com.techtask.technical_test_task.repository.NoteRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,7 +25,6 @@ public class NoteService {
     }
 
     public Note createNote(Note note) {
-        tagsValidation(note.getTags());
         note.setCreateDate(LocalDateTime.now());
         return noteRepository.save(note);
     }
@@ -33,11 +33,11 @@ public class NoteService {
         return noteRepository.findAll();
     }
 
-    public Page<NoteDTO> getNotes(String tag, int page, int size) {
+    public Page<NoteDTO> getNotes(List<Tag> tags, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate"));
         Page<Note> notesPage;
-        if (tag != null && !tag.isBlank()) {
-            notesPage = noteRepository.findByTagsIn(List.of(tag), pageable);
+        if (tags != null) {
+            notesPage = noteRepository.findByTagsIn(tags, pageable);
         } else {
             notesPage = noteRepository.findAll(pageable);
         }
@@ -59,7 +59,6 @@ public class NoteService {
         }
         note.setTitle(updatedNote.getTitle());
         note.setText(updatedNote.getText());
-        tagsValidation(updatedNote.getTags());
         note.setTags(updatedNote.getTags());
         return noteRepository.save(note);
     }
@@ -88,16 +87,4 @@ public class NoteService {
                 ));
     }
 
-    private void tagsValidation(List<String> tags){
-        List<String> allowedTags = List.of("BUSINESS", "PERSONAL", "IMPORTANT");
-
-        if(tags == null){
-            return;
-        }
-        for(String tag : tags){
-            if(!allowedTags.contains(tag)){
-                throw new IllegalArgumentException("Invalid tag: " + tag);
-            }
-        }
-    }
 }
