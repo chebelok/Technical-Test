@@ -1,7 +1,9 @@
 package com.techtask.technical_test_task.dto;
 
-import java.time.LocalDateTime;
+import lombok.Data;
 
+import java.time.LocalDateTime;
+@Data
 public class NoteDTO {
 
     private final String id;

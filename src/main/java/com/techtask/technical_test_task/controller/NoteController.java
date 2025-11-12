@@ -39,11 +39,11 @@ public class NoteController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Note> getNoteById(@PathVariable String id) {
-        return noteService.getNoteById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(()->ResponseEntity.notFound().build());
-//        Note note = noteService.getNoteById(id);
-//        return ResponseEntity.ok(note);
+//        return noteService.getNoteById(id)
+//                .map(ResponseEntity::ok)
+//                .orElseGet(()->ResponseEntity.notFound().build());
+        Note note = noteService.getNoteById(id);
+        return ResponseEntity.ok(note);
     }
 
     @GetMapping
