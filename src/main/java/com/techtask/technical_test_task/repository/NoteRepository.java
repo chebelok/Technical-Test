@@ -11,5 +11,6 @@ import java.util.List;
 
 @Repository
 public interface NoteRepository extends MongoRepository<Note, String> {
-    Page<Note> findByTagsIn(List<Tag> tag, Pageable pageable);
+    Page<Note> findByTags(Tag tag, Pageable pageable);
+
 }

@@ -33,14 +33,16 @@ public class NoteService {
         return noteRepository.findAll();
     }
 
-    public Page<NoteDTO> getNotes(List<Tag> tags, int page, int size) {
+    public Page<NoteDTO> getNotes(Tag tag, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate"));
         Page<Note> notesPage;
-        if (tags != null) {
-            notesPage = noteRepository.findByTagsIn(tags, pageable);
+
+        if (tag != null) {
+            notesPage = noteRepository.findByTags(tag, pageable);
         } else {
             notesPage = noteRepository.findAll(pageable);
         }
+
         return notesPage.map(note -> new NoteDTO(
                 note.getId(),
                 note.getTitle(),
@@ -48,35 +50,42 @@ public class NoteService {
         ));
     }
 
-    public Optional<Note> getNoteById(String id) {
-        return noteRepository.findById(id);
+        public Note getNoteById(String id) {
+        return noteRepository.findById(id).orElseThrow(NoSuchElementException::new);
     }
 
-    public Note updateNote(String id, Note updatedNote) {
-        Note note = noteRepository.findById(id).orElse(null);
-        if (note == null){
-            return null;
-        }
+    public Optional<Note> updateNote(String id, Note updatedNote) {
+        Note note = noteRepository.findById(id).orElseThrow(NoSuchElementException::new);
+
         note.setTitle(updatedNote.getTitle());
         note.setText(updatedNote.getText());
         note.setTags(updatedNote.getTags());
-        return noteRepository.save(note);
+        return Optional.of(noteRepository.save(note));
     }
 
-    public void deleteNote(String id) {
+    public boolean deleteNote(String id) {
+        if (!noteRepository.existsById(id)) {
+            return false;
+        }
         noteRepository.deleteById(id);
+        return true;
     }
 
-    public Map<String, Long> countStat(String id){
-        Note note = noteRepository.findById(id).orElseThrow();
-        String initialText = note.getText();
-        Map<String, Long> wordCounts = Arrays.stream(initialText.toLowerCase().split("\\s+"))
+    public Optional<Map<String, Long>> countStat(String id){
+
+        Optional<Note> noteOpt = noteRepository.findById(id);
+        if (noteOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Note note = noteOpt.get();
+        Map<String, Long> wordCounts = Arrays.stream(note.getText().toLowerCase()
+                        .replaceAll("[^a-zA-Z\\s]", "")
+                        .split("\\s+"))
                 .filter(word -> !word.isEmpty())
-                .collect(Collectors.groupingBy(
-                        Function.identity(),
-                        Collectors.counting()
-                ));
-        return wordCounts.entrySet()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        Map<String, Long> result = wordCounts.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .collect(Collectors.toMap(
@@ -85,6 +94,7 @@ public class NoteService {
                         (e1, e2) -> e1,
                         LinkedHashMap::new
                 ));
+        return Optional.of(result);
     }
 
 }
