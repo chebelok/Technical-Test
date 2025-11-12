@@ -2,6 +2,8 @@
 
 A simple Spring Boot + MongoDB REST API that allows users to create, update, delete, and list notes with filtering, sorting, and word statistics.  
 
+## Requirements
+It is necessary to have docker and docker compose installed, otherwise it would not be possible to run tests.
 
 ## Run the Application (via Docker)
 
@@ -33,6 +35,15 @@ To remove data volumes:
 ```bash
 
 docker-compose down -v
+```
+
+## Run the Tests
+Execute in the project's root directory:
+```bash
+
+docker compose up --build mongo -d
+
+mvn test
 ```
 
 
